@@ -1,24 +1,23 @@
-# FMV · Fast Model Viewer
+<p align="center">
+  <img src="public/fmv-icon.png" alt="FMV app icon" width="88" height="88">
+</p>
 
-3B modellerini tarayıcıda veya Electron penceresinde aç. Birden fazla model varsa model rafında önizlemeleri görür ve kartlara tıklayarak aralarında geçiş yaparsın. Model dosyaları ve dokular bilgisayarında kalır.
+<h1 align="center">Fast Model Viewer</h1>
 
-## Kurulum
+<p align="center">Open and inspect local 3D models in a desktop browser or in Electron.</p>
 
-Node.js 22.13 veya üzeri ve npm gerekir. Tarayıcıda 3B önizleme için WebGL 2 desteği gerekir.
+<p align="center">
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#using-fmv">Using FMV</a> ·
+  <a href="#supported-formats">Formats</a> ·
+  <a href="#electron-app">Electron app</a>
+</p>
 
-Proje klasöründe çalıştır:
+![Fast Model Viewer in dark mode with a model, inspection controls, and a thumbnail shelf](docs/fmv-preview.webp)
 
-```sh
-npm ci
-npm run build
-npm link
-```
+## Quick start
 
-`npm link` etkin Node.js kurulumunun komut dizinine `fmv` bağlantısını ekler. Bu dizin `PATH` üzerindeyse PowerShell, Windows Terminal, Bash ve zsh aynı komutu çalıştırır. PowerShell komut dosyası politikası npm bağlantısını engellerse `fmv.cmd` kullanabilirsin.
-
-### macOS Terminal
-
-Node.js 22.13 veya üzeri ve Git kuruluysa Terminal’de çalıştır:
+Install Git and **Node.js 22.13 or later** with npm. The viewer requires WebGL 2 and is designed for desktop browsers and desktop apps.
 
 ```sh
 git clone https://github.com/umutokcelik/FMV-FastModelViewer.git
@@ -29,9 +28,32 @@ npm link
 fmv
 ```
 
-`fmv "$HOME/Models/ornek.glb"` ile doğrudan bir model açabilirsin. `npm link` bu klasöre bağlantı verdiği için kurulumdan sonra klasörü sakla. Bağlantı kurmadan çalıştırmak için proje klasöründe `node bin/fmv.mjs` kullan.
+The `fmv` command starts a server on `127.0.0.1`, picks a free port, and opens your default browser. Press **Ctrl+C** to stop it. Keep the checkout in place so the link installed by `npm link` stays valid.
 
-## Kullanım
+### macOS
+
+Run the same commands in Terminal. To open a model directly:
+
+```sh
+fmv "$HOME/Models/example.glb"
+```
+
+If you prefer to run from the checkout without installing a shell command, use `node bin/fmv.mjs` after building. On Windows, `fmv.cmd` also works if PowerShell blocks the npm command shim.
+
+## Using FMV
+
+| Action | Behavior |
+| --- | --- |
+| Open a file or folder | Use the icons next to Settings, or pass a path such as `fmv "./Models"`. |
+| Drop onto the viewer | Replace the current selection with the dropped files or folder. |
+| Drop onto the shelf | Add models to the collection and keep the current model in view. The shelf appears while dragging and stays open when the collection contains multiple models. |
+| Orbit, zoom, or move the light | Drag to orbit, scroll or pinch to zoom, and use **Alt + drag** to move the light on models that use scene lighting. |
+| Inspect a model | Switch between the render, available material channels, wireframe, vertex normals, and the UV checker. |
+| Adjust the interface | Change the theme, select English or Turkish, move the shelf, or set the UI scale from 70% to 130%. |
+
+For models with external textures, `.bin` buffers, or `.mtl` files, open the containing folder to keep relative paths intact. Files are read from your computer and served only over loopback when opened through the CLI. The viewer does not fetch remote resources referenced by models.
+
+### Command line
 
 ```sh
 fmv
@@ -41,55 +63,43 @@ fmv --no-open "./Models/my scene.gltf"
 fmv --help
 ```
 
-`fmv` kullanılabilir bir port seçer ve varsayılan tarayıcıyı açar. `--no-open` tarayıcıyı açmadan adresi terminale yazar. Aynı anda birden fazla oturum çalışabilir. `Ctrl+C` yerel sunucuyu durdurur. Komutu sisteme bağlamadan denemek için `node bin/fmv.mjs "./Models"` çalıştırabilirsin.
+`--no-open` prints the local URL without launching a browser. Use `--` before a path that starts with a dash. Each invocation can run on its own port.
 
-- Görüntüleyicinin üzerine bir model bırakınca mevcut seçimin yerini alır. Birden fazla model içeren klasör bırakırsan yeni modeller birlikte açılır.
-- Rafın üzerine bıraktığın modeller mevcut koleksiyona eklenir ve seçili model sahnede kalır. Bir veya sıfır model varken sürükleme sırasında rafın bırakma alanı görünür. İkinci model eklendiğinde raf her model için bir önizleme gösterir.
-- Üst çubuğun sağındaki **Ayarlar** menüsünden karanlık modu açıp kapatabilir, bayraklarla arayüz dilini değiştirebilir ve rafı sola alabilirsin. İlk açılışta tema tarayıcı veya işletim sistemi tercihini izler. Dil tercihi Türkçeyse Türkçe, diğer durumlarda İngilizce seçilir. Manuel seçimler hatırlanır.
-- **Arayüz Ölçeği** varsayılan olarak %100’dür. Ayarlardaki **−** ve **+** ile %70–%130 arasında onar puan değiştirilebilir. Uygulama içindeki Ctrl/Cmd ile `+` ve `-` yakınlaştırma kısayolları kapalıdır.
-- Sağ üstte, ayarlar çarkının yanındaki **Dosya aç** ve **Klasör aç** ikonlarıyla yeni bir seçim başlatabilirsin. Harici doku, `.mtl` veya `.bin` kullanan modelleri kaynaklarıyla birlikte aç. Kaynaklar alt klasörlerdeyse klasörü seç veya sürükle. CLI’da bir modelin harici kaynaklarını açmak için klasör yolunu verebilirsin.
-- Modeli sürükleyerek döndür, tekerlek veya iki parmakla yakınlaştır. Sahne ışığını kullanan bir modelde Alt + sürükle ile ana ışığı hareket ettir.
-- Görünüm menüsü modelde bulunan materyal kanallarını, tel kafesi, normal vektörlerini ve UV kontrol desenini gösterir.
+## Supported formats
 
-Desteklenen biçimler GLB, glTF 2.0, OBJ, FBX, STL, PLY, DAE, 3MF, 3DS, AMF, USD, USDA, USDC, USDZ, WRL, VRML, VOX, VTK, VTP, PCD ve XYZ’dir. Diğer biçimleri bu listeden birine dışa aktararak açabilirsin.
+| Family | Extensions |
+| --- | --- |
+| glTF and common interchange | `.glb`, `.gltf`, `.obj`, `.fbx`, `.stl`, `.ply`, `.dae`, `.3mf`, `.3ds`, `.amf` |
+| USD | `.usd`, `.usda`, `.usdc`, `.usdz` |
+| Scene, voxel, and scientific data | `.wrl`, `.vrml`, `.vox`, `.vtk`, `.vtp`, `.pcd`, `.xyz` |
 
-Meshopt sıkıştırması desteklenir. Draco veya KTX2 kullanan modelleri bu sıkıştırmaları kaldırarak yeniden dışa aktar. Animasyonlar oynatılmaz ve modelin uzak URL’lere verdiği kaynak referansları yüklenmez.
+glTF 2.0 and Meshopt compression are supported. Export models without Draco or KTX2 compression. The viewer displays static models and does not play animations.
 
-## Electron ve paketleme
+## Electron app
 
 ```sh
-npm run desktop
-npm run package
-npm run package:dir
+npm run desktop     # Build and launch the Electron window
+npm run package     # Build an installer for the current platform
+npm run package:dir # Build an unpacked application directory
 ```
 
-| Komut | Çıktı |
-| --- | --- |
-| `npm run desktop` | Next.js derlemesini bir Electron penceresinde açar. |
-| `npm run package` | Geçerli işletim sistemi için kurulabilir paketi `dist/<sürüm>/` altında üretir. |
-| `npm run package:dir` | Kurulum dosyası oluşturmadan çalıştırılabilir bir paket klasörü üretir. |
+Electron uses the same production build as the browser. The packaging configuration targets **NSIS** on Windows, **DMG** on macOS, and **AppImage** on Linux. Run packaging on the target OS. Outputs go to `dist/<version>/`, and local Windows installers are unsigned by default.
 
-| Platform | Paket |
-| --- | --- |
-| Windows | NSIS kurulum dosyası, ör. `dist/1.3.4/FMV Setup 1.3.4.exe` |
-| macOS | DMG |
-| Linux | AppImage |
-
-Paketleri hedef işletim sisteminde üret. Windows’ta yerel kurulum dosyası imzasız üretilir. Paketlenmiş uygulama Next.js çıktısını ve Electron çalışma zamanını içerir.
-
-## Geliştirme ve beş faz
+## Development
 
 ```sh
 npm run dev
 npm test
 ```
 
-`npm run dev`, arayüz geliştirmek için `http://127.0.0.1:3000` adresini kullanır. CLI’ı veya Electron’u son değişikliklerle denemek için üretim derlemesini yenile.
+The Next.js development server uses `http://127.0.0.1:3000`. Run `npm run build` again after changing code used by the CLI or Electron.
 
-1. **Kaynak modül.** Three.js sahnesi, GLTFLoader, OrbitControls, materyal eşleme, inceleme modları ve ışık kontrolleri kaynak portfolyodan uyarlandı. `lib/viewer/engine.js` dışa aktardığı `createModelViewer(host, asset, callbacks)` ile React’ten bağımsızdır. `asset.path` modelin göreli yolu, `asset.resolve(relativePath)` ise dosya kaynağını çözer. Bileşen kaldırılırken `dispose()` çağrılır.
-2. **Next.js arayüzü.** Dosya ve klasör seçme, iki sürükle-bırak bölgesi ve önizleme rafı App Router üzerinde çalışır. Tarayıcıda seçilen dosyalar doğrudan görüntüleyiciye verilir.
-3. **CLI.** npm komut bağlantısını sağlar. Yerel sunucu işletim sisteminin atadığı portta `127.0.0.1` üzerinde açılır. Komut satırından seçilen dosyalar ve bunların yerel kaynakları o oturuma ait bir bağlantıyla okunur.
-4. **Masaüstü.** Electron aynı statik Next.js çıktısını ve yerel sunucuyu kullanır. Uygulama kapanınca sunucu da durur.
-5. **Doğrulama.** `npm test` materyal kanallarını, kamera ve ışık etkileşimlerini, oturum sınırlarını ve eşzamanlı sunucuları kontrol eder.
+| Path | Responsibility |
+| --- | --- |
+| `app/`, `components/` | Next.js interface, drop targets, and model shelf |
+| `lib/viewer/` | Three.js rendering, loaders, and inspection modes |
+| `bin/fmv.mjs`, `lib/local-server.mjs` | CLI entry point and loopback server |
+| `electron/` | Electron main process and isolated preload |
+| `test/` | Viewer, local-file, and server tests |
 
-Kaynak görüntüleyici [umutokcelik/candurmaz-portfolio](https://github.com/umutokcelik/candurmaz-portfolio/tree/main/lib/viewer) reposundadır.
+The original Three.js viewer was adapted from [umutokcelik/candurmaz-portfolio](https://github.com/umutokcelik/candurmaz-portfolio/tree/main/lib/viewer).

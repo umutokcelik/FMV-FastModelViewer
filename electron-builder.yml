@@ -4,8 +4,8 @@ icon: public/fmv-icon.png
 directories:
   output: dist/${version}
 files:
-  - desktop/main.mjs
-  - desktop/preload.cjs
+  - electron/main.mjs
+  - electron/preload.cjs
   - lib/local-server.mjs
   - lib/launch-files.mjs
   - lib/model-paths.mjs
