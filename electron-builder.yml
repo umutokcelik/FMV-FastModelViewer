@@ -1,0 +1,22 @@
+appId: com.fmv.localviewer
+productName: FMV
+icon: public/fmv-icon.png
+directories:
+  output: dist/${version}
+files:
+  - desktop/main.mjs
+  - desktop/preload.cjs
+  - lib/local-server.mjs
+  - lib/launch-files.mjs
+  - lib/model-paths.mjs
+  - lib/ui-scale.mjs
+  - out/**/*
+asar: true
+win:
+  target: nsis
+mac:
+  target: dmg
+  category: public.app-category.graphics-design
+linux:
+  target: AppImage
+  category: Graphics
