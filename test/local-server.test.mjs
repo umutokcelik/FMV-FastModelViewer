@@ -4,7 +4,7 @@ import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { startLocalServer } from '../lib/local-server.mjs';
+import { preferredPort, startLocalServer } from '../lib/local-server.mjs';
 
 async function fixture(t) {
   const root = await mkdtemp(path.join(os.tmpdir(), 'fmv-test-'));
@@ -60,4 +60,19 @@ test('folder launches can run at once and reject foreign hosts and paths outside
   });
   assert.equal(status, 403);
   assert.match(await (await fetch(second.origin)).text(), /FMV/);
+});
+
+test('uses the preferred port when available and falls back when it is occupied', async (t) => {
+  const { webRoot } = await fixture(t);
+  const primary = await startLocalServer({ webRoot });
+  t.after(() => primary.close());
+  if (new URL(primary.origin).port !== String(preferredPort)) {
+    t.skip('The preferred port is already in use outside the test');
+    return;
+  }
+
+  const fallback = await startLocalServer({ webRoot });
+  t.after(() => fallback.close());
+  assert.notEqual(new URL(fallback.origin).port, String(preferredPort));
+  assert.match(await (await fetch(fallback.origin)).text(), /FMV/);
 });

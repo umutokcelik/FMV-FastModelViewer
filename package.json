@@ -1,7 +1,7 @@
 {
   "name": "fmv-local-viewer",
   "productName": "FMV",
-  "version": "1.3.4",
+  "version": "1.3.5",
   "private": true,
   "description": "Local 3D model viewer for desktop browsers and Electron",
   "main": "electron/main.mjs",
@@ -18,7 +18,7 @@
     "node": ">=22.13.0"
   },
   "scripts": {
-    "dev": "next dev --hostname 127.0.0.1",
+    "dev": "next dev --hostname 127.0.0.1 --port 53783",
     "build": "next build",
     "start": "node bin/fmv.mjs --no-open",
     "desktop": "npm run build && electron .",

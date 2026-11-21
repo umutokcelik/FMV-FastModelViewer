@@ -1,0 +1,107 @@
+name: Build and publish release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fmv-release
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform }}
+    if: github.ref == 'refs/heads/main'
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-2025
+            platform: windows-x64
+            target: win
+            arch: x64
+            extension: exe
+          - runner: macos-15
+            platform: macos-arm64
+            target: mac
+            arch: arm64
+            extension: dmg
+          - runner: macos-15-intel
+            platform: macos-x64
+            target: mac
+            arch: x64
+            extension: dmg
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Package Electron
+        shell: bash
+        env:
+          TARGET: ${{ matrix.target }}
+          ARCH: ${{ matrix.arch }}
+        run: |
+          args=("--$TARGET" "--$ARCH")
+          if [[ "$TARGET" == mac ]]; then
+            args+=(--config.mac.identity=- --config.mac.hardenedRuntime=false --config.mac.notarize=false)
+          fi
+          npm run package -- "${args[@]}"
+      - name: Name the release asset
+        shell: bash
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          EXTENSION: ${{ matrix.extension }}
+        run: |
+          version=$(node -p "require('./package.json').version")
+          shopt -s nullglob
+          files=(dist/"$version"/*."$EXTENSION")
+          if [[ "${#files[@]}" -ne 1 ]]; then
+            printf 'Expected one %s file, found %d\n' "$EXTENSION" "${#files[@]}" >&2
+            exit 1
+          fi
+          mkdir -p release
+          cp "${files[0]}" "release/FMV-$version-$PLATFORM.$EXTENSION"
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: installer-${{ matrix.platform }}
+          path: release/
+          if-no-files-found: error
+          compression-level: 0
+
+  publish:
+    name: Publish GitHub release
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with:
+          pattern: installer-*
+          path: release/
+          merge-multiple: true
+      - name: Publish installers
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(node -p "require('./package.json').version")
+          gh release create "v$version" \
+            "release/FMV-$version-windows-x64.exe#Windows (x64)" \
+            "release/FMV-$version-macos-arm64.dmg#macOS (Apple Silicon)" \
+            "release/FMV-$version-macos-x64.dmg#macOS (Intel)" \
+            --target "$GITHUB_SHA" --title "FMV $version" \
+            --notes 'Windows installer is unsigned. macOS builds are ad-hoc signed and not notarized.'

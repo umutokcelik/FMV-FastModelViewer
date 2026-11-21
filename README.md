@@ -28,7 +28,7 @@ npm link
 fmv
 ```
 
-The `fmv` command starts a server on `127.0.0.1`, picks a free port, and opens your default browser. Press **Ctrl+C** to stop it. Keep the checkout in place so the link installed by `npm link` stays valid.
+The `fmv` command opens your default browser at `http://127.0.0.1:53783` when that port is available. If it is occupied, FMV picks another free loopback port. Press **Ctrl+C** to stop it. Keep the checkout in place so the link installed by `npm link` stays valid.
 
 ### macOS
 
@@ -77,29 +77,12 @@ glTF 2.0 and Meshopt compression are supported. Export models without Draco or K
 
 ## Electron app
 
+Download Windows and macOS installers from the [latest GitHub release](https://github.com/umutokcelik/FMV-FastModelViewer/releases/latest), or package the app locally:
+
 ```sh
 npm run desktop     # Build and launch the Electron window
 npm run package     # Build an installer for the current platform
 npm run package:dir # Build an unpacked application directory
 ```
 
-Electron uses the same production build as the browser. The packaging configuration targets **NSIS** on Windows, **DMG** on macOS, and **AppImage** on Linux. Run packaging on the target OS. Outputs go to `dist/<version>/`, and local Windows installers are unsigned by default.
-
-## Development
-
-```sh
-npm run dev
-npm test
-```
-
-The Next.js development server uses `http://127.0.0.1:3000`. Run `npm run build` again after changing code used by the CLI or Electron.
-
-| Path | Responsibility |
-| --- | --- |
-| `app/`, `components/` | Next.js interface, drop targets, and model shelf |
-| `lib/viewer/` | Three.js rendering, loaders, and inspection modes |
-| `bin/fmv.mjs`, `lib/local-server.mjs` | CLI entry point and loopback server |
-| `electron/` | Electron main process and isolated preload |
-| `test/` | Viewer, local-file, and server tests |
-
-The original Three.js viewer was adapted from [umutokcelik/candurmaz-portfolio](https://github.com/umutokcelik/candurmaz-portfolio/tree/main/lib/viewer).
+Electron uses the same production build and loopback server as the CLI. The packaging configuration targets **NSIS** on Windows, **DMG** on macOS, and **AppImage** on Linux. Run packaging on the target OS. Outputs go to `dist/<version>/`.
